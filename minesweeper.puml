@@ -1,0 +1,59 @@
+@startuml
+'扫雷游戏UML序列图
+
+autonumber
+
+actor Player
+participant "Game UI" as UI
+participant "Game Logic" as Logic
+participant "Board" as Board
+participant "Timer" as Timer
+participant "Score" as Score
+
+Player -> UI: 开始新游戏
+UI -> Logic: 请求初始化游戏(难度)
+Logic -> Board: 创建游戏棋盘(行数, 列数, 地雷数)
+Board --> Logic: 返回初始化的棋盘
+Logic -> Timer: 开始计时
+Logic -> Score: 重置分数
+Logic --> UI: 返回初始游戏状态
+UI -> UI: 渲染游戏界面
+
+Player -> UI: 点击格子(x,y)
+UI -> Logic: 处理格子点击(x,y)
+Logic -> Board: 检查格子状态(x,y)
+alt 点击空白格子
+    Board -> Board: 递归展开空白区域
+    Board --> Logic: 返回展开的格子列表
+    Logic -> Score: 更新分数(根据展开格子数)
+else 点击地雷
+    Board --> Logic: 返回游戏失败
+    Logic -> Timer: 停止计时
+    Logic --> UI: 返回游戏失败状态
+    UI -> UI: 显示所有地雷位置
+    UI -> UI: 显示游戏失败消息
+else 点击数字格子
+    Board --> Logic: 返回格子数字
+    Logic -> Score: 更新分数(根据格子数字)
+else 点击已标记格子
+    Logic --> UI: 返回操作无效消息
+
+
+Logic --> UI: 返回更新后的游戏状态
+UI -> UI: 更新游戏界面
+
+Player -> UI: 右键点击格子(x,y)
+UI -> Logic: 标记/取消标记格子(x,y)
+Logic -> Board: 更新格子标记状态(x,y)
+Board --> Logic: 返回更新后的格子状态
+Logic --> UI: 返回更新后的游戏状态
+UI -> UI: 更新游戏界面
+
+alt 所有非地雷格子被揭开
+    Logic -> Timer: 停止计时
+    Logic -> Score: 计算最终分数
+    Logic --> UI: 返回游戏胜利状态
+    UI -> UI: 显示游戏胜利消息
+    UI -> UI: 显示最终分数和用时
+
+@enduml
